@@ -21,7 +21,6 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
-	"github.com/beevik/ntp"
 )
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -705,7 +704,7 @@ var scanModes = []ScanMode{
 		},
 	},
 	{
-		Label: "Profundo (~45 min)", Description: "Scripts vuln com timeouts.",
+		Label: "Profundo (~45 min)", Description: "Scripts vuln com timeouts. ",
 		Args: func(target, extraPorts string) []string {
 			return []string{"-sS", "-sV", "--version-intensity", "6", "-O", "--osscan-limit", "-T4",
 				"--min-rate", "300", "--max-retries", "2", "--host-timeout", "5m", "--script-timeout", "30s",
@@ -887,6 +886,7 @@ pre{white-space:pre-wrap;word-break:break-word;font-family:inherit}
 // ════════════════════════════════════════════════════════════════════════════
 
 func main() {
+	os.Setenv("FYNE_RENDER", "software")
 	a := app.New()
 
 	// ── Verificação de licença ANTES de abrir a janela principal ─────────
@@ -1219,41 +1219,24 @@ type LicenseStatus struct {
 }
 
 func CheckLicense() LicenseStatus {
-    // 1. DATA DE EXPIRAÇÃO: 28/03/2026 às 23:59
-    expirationDate := time.Date(2026, time.March, 28, 23, 59, 59, 0, time.Local)
-    
-    // 2. CONSULTA HORA REAL (NTP) - Usando servidores do Google ou NTP.br
-    // Tenta o Google primeiro, se falhar tenta o pool brasileiro
-    currentTime, err := ntp.Time("time.google.com")
-    if err != nil {
-        currentTime, err = ntp.Time("a.st1.ntp.br")
-    }
+	// CONFIGURAÇÃO DA EXPIRAÇÃO: 2 dias a partir de hoje (26/03/2026)
+	// O formato é: Ano, Mês, Dia, Hora, Minuto, Segundo, Nanosegundo, Localização
+	expirationDate := time.Date(2026, time.March, 28, 23, 59, 59, 0, time.Local)
+	
+	now := time.Now()
+	
+	if now.After(expirationDate) {
+		return LicenseStatus{
+			Active:  false,
+			Message: "A licença de avaliação da Zebyte expirou em " + expirationDate.Format("02/01/2006") + ". Entre em contato com contato@zebyte.com.br para renovar.",
+		}
+	}
 
-    // Se o cliente estiver SEM INTERNET, você decide: 
-    // Bloquear (mais seguro) ou usar a hora local (mais permissivo)
-    if err != nil {
-        // Para a Zebyte, vamos ser rigorosos: Sem internet = Não abre (evita burla)
-        return LicenseStatus{
-            Active:  false, 
-            Message: "Erro de conexão: O ZeScan Pro requer internet para validar a licença da Zebyte.",
-        }
-    }
+	daysLeft := int(expirationDate.Sub(now).Hours() / 24)
+	hoursLeft := int(expirationDate.Sub(now).Hours()) % 24
 
-    // 3. COMPARAÇÃO COM A HORA REAL
-    if currentTime.After(expirationDate) {
-        return LicenseStatus{
-            Active:  false,
-            Message: "⛔ Licença Expirada em " + expirationDate.Format("02/01/2006") + ". Contato: dilsinhu@zebyte.com.br",
-        }
-    }
-
-    // 4. CÁLCULO DO TEMPO RESTANTE
-    diff := expirationDate.Sub(currentTime)
-    days := int(diff.Hours() / 24)
-    hours := int(diff.Hours()) % 24
-
-    return LicenseStatus{
-        Active:  true,
-        Message: fmt.Sprintf("Licença Zebyte [OK]: Expira em %d dias e %d horas", days, hours),
-    }
+	return LicenseStatus{
+		Active:  true,
+		Message: fmt.Sprintf("Licença Zebyte Ativa: Expira em %d dias e %d horas (%s)", daysLeft, hoursLeft, expirationDate.Format("02/01/2006")),
+	}
 }
