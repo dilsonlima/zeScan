@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=ZeScan Pro
+Comment=Auditoria Zebyte
+Exec=/usr/local/bin/zescan
+Icon=zescan
+Terminal=false
+Categories=Utility;Security;

@@ -1,0 +1,7 @@
+Package: zescan
+Version: 1.0.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: Zebyte Consulting <contato@zebyte.com.br>
+Description: Ferramenta de auditoria de rede ZeScan Pro.

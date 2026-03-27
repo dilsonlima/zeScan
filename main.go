@@ -14,6 +14,7 @@ import (
 	"runtime"
 	"strings"
 	"time"
+	"embed"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -29,6 +30,7 @@ import (
 
 var ouiDB = map[string]string{}
 var ouiLoaded = false
+var logoData embed.FS
 
 const ouiCacheFile = ".oui_cache.txt"
 const ouiURL = "https://standards-oui.ieee.org/oui/oui.txt"
@@ -921,9 +923,10 @@ func main() {
 	w := a.NewWindow("ZeScan Pro v.1 — Auditoria Zebyte")
 	w.Resize(fyne.NewSize(640, 620))
 
+	
 	logo := canvas.NewImageFromFile("logo.png")
 	logo.FillMode = canvas.ImageFillContain
-	logo.SetMinSize(fyne.NewSize(120, 90))
+	logo.SetMinSize(fyne.NewSize(120, 90)) 
 
 	// Banner de licença (dias restantes)
 	licBanner := widget.NewLabel("🔑 " + lic.Message)
